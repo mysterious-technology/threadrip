@@ -1,11 +1,13 @@
-const DEBUG = true;
 const Twitter = require('twitter-lite');
 const queryString = require('query-string');
 require('dotenv').config();
 
+const DEBUG = true;
+const MINUTES_BETWEEN_RUNS = 1;
+
 const searchUrl = () => {
   let d = new Date();
-  d.setMinutes(d.getMinutes() - 60);
+  d.setMinutes(d.getMinutes() - MINUTES_BETWEEN_RUNS);
   const params = {
     query: '@threadrip unroll',
     'tweet.fields': 'conversation_id,author_id',
@@ -38,8 +40,12 @@ const run = async () => {
   const v1Config = {
     subdomain: 'api',
     version: '1.1',
-    bearer_token: user.access_token,
+    consumer_key: process.env.TWITTER_ID,
+    consumer_secret: process.env.TWITTER_SECRET,
+    access_token_key: process.env.TWITTER_ACCESS_TOKEN,
+    access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
   };
+  DEBUG && console.log('v1Config', JSON.stringify(v1Config, null, 2));
   const v2Client = new Twitter(v2Config);
   const v1Client = new Twitter(v1Config);
   try {
@@ -64,7 +70,7 @@ const run = async () => {
               in_reply_to_status_id: t.id,
             };
             DEBUG && console.log('postParams', JSON.stringify(params, null, 2));
-            const replyRes = await v1Client.post('statuses/update', params);
+            const replyRes = await v1Client.post('statuses/update.json', params);
             DEBUG && console.log('replyRes', JSON.stringify(replyRes, null, 2));
           } catch (e) {
             console.log(e);
