@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@types/node@>=8.1.0":
+  version "14.6.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.6.0.tgz#7d4411bf5157339337d7cff864d9ff45f177b499"
+  integrity sha512-mikldZQitV94akrc4sCcSjtJfsTKt4p+e/s0AGscVA6XArQ9kFclP+ZiYUMnq987rc6QlYxXv/EivqlfSLxpKA==
+
 abab@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.4.tgz#6dfa57b417ca06d21b2478f0e638302f99c2405c"
@@ -34,6 +39,11 @@ oauth-1.0a@^2.2.4:
   resolved "https://registry.yarnpkg.com/oauth-1.0a/-/oauth-1.0a-2.2.6.tgz#eadbccdb3bceea412d24586e6f39b2b412f0e491"
   integrity sha512-6bkxv3N4Gu5lty4viIcIAnq5GbxECviMBeKR3WX/q87SPQ8E8aursPZUtsXDnxCs787af09WPRBLqYrf/lwoYQ==
 
+qs@^6.6.0:
+  version "6.9.4"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.9.4.tgz#9090b290d1f91728d3c22e54843ca44aea5ab687"
+  integrity sha512-A1kFqHekCTM7cz0udomYUoYNWjBebHm/5wzU/XqrBRBNWectVH0QIiN+NEcZ0Dte5hvzHwbr8+XQmguPhJ6WdQ==
+
 query-string@^6.13.1:
   version "6.13.1"
   resolved "https://registry.yarnpkg.com/query-string/-/query-string-6.13.1.tgz#d913ccfce3b4b3a713989fe6d39466d92e71ccad"
@@ -53,9 +63,17 @@ strict-uri-encode@^2.0.0:
   resolved "https://registry.yarnpkg.com/strict-uri-encode/-/strict-uri-encode-2.0.0.tgz#b9c7330c7042862f6b142dc274bbcc5866ce3546"
   integrity sha1-ucczDHBChi9rFC3CdLvMWGbONUY=
 
+stripe@^8.89.0:
+  version "8.89.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-8.89.0.tgz#fcd48ba7e298d547c89b686dea155f0507c25e67"
+  integrity sha512-XiAuNAyv2ORCWZrIaG22frr7rXP1J5+XsHA4QUBwB0fePB5kxV0O6FFMrZ8nipYZ43pnez5EIJ/Oxb1jLq6w6g==
+  dependencies:
+    "@types/node" ">=8.1.0"
+    qs "^6.6.0"
+
 "twitter-lite@https://github.com/mysterious-technology/twitter-lite#master":
   version "0.14.0"
-  resolved "https://github.com/mysterious-technology/twitter-lite#75dddd357ce1223259be7e00b1eccabb47f00e32"
+  resolved "https://github.com/mysterious-technology/twitter-lite#ec74dc0717b3bb39cb815b81283c857d6cfe364e"
   dependencies:
     cross-fetch "^3.0.0"
     oauth-1.0a "^2.2.4"

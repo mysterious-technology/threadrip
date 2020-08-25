@@ -8,16 +8,16 @@ if (process.env.NODE_ENV === 'production') {
 }
 const MINUTES_BETWEEN_RUNS = 2;
 
-const searchUrl = () => {
-  let d = new Date();
-  d.setMinutes(d.getMinutes() - MINUTES_BETWEEN_RUNS);
+const searchUrl = (sinceId) => {
   const params = {
     query: '@threadrip unroll',
     'tweet.fields': 'conversation_id,author_id',
     'user.fields': 'username',
     expansions: 'author_id',
-    start_time: d.toISOString(),
   };
+  if (sinceId) {
+    params['since_id'] = sinceId;
+  }
   DEBUG && console.log('params', JSON.stringify(params, null, 2));
   const qs = queryString.stringify(params);
   return `tweets/search/recent?${qs}`;
@@ -31,6 +31,16 @@ const buildStatus = (tweet, usernameMap) => {
 };
 
 const run = async () => {
+  console.log('starting run');
+  let sinceId = null;
+  const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  try {
+    const customer = await stripe.customers.retrieve(process.env.STRIPE_CUSTOMER_ID);
+    sinceId = customer.metadata['since_id'];
+  } catch (e) {
+    console.error(e);
+  }
+
   const userClient = new Twitter({
     consumer_key: process.env.TWITTER_ID,
     consumer_secret: process.env.TWITTER_SECRET,
@@ -53,7 +63,8 @@ const run = async () => {
   const v2Client = new Twitter(v2Config);
   const v1Client = new Twitter(v1Config);
   try {
-    const searchRes = await v2Client.get(searchUrl());
+    const searchRes = await v2Client.get(searchUrl(sinceId));
+    console.log('search:', searchRes.meta);
     DEBUG && console.log('searchRes', JSON.stringify(searchRes, null, 2));
     let usernameMap = {};
     if (searchRes.includes && searchRes.includes.users) {
@@ -73,14 +84,18 @@ const run = async () => {
               status: status,
               in_reply_to_status_id: t.id,
             };
-            // DEBUG && console.log('postParams', JSON.stringify(params, null, 2));
             const replyRes = await v1Client.post('statuses/update.json', params);
+            console.log('replied to:', t.id);
             DEBUG && console.log('replyRes', JSON.stringify(replyRes, null, 2));
           } catch (e) {
             console.log(e);
           }
         };
         reply();
+      });
+      const newSinceId = searchData[0].id;
+      await stripe.customers.update(process.env.STRIPE_CUSTOMER_ID, {
+        metadata: { since_id: `${newSinceId}` },
       });
     }
   } catch (e) {
