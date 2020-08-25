@@ -2,7 +2,7 @@ const Twitter = require('twitter-lite');
 const queryString = require('query-string');
 require('dotenv').config();
 
-const DEBUG = false;
+let DEBUG = false;
 if (process.env.NODE_ENV === 'production') {
   DEBUG = false;
 }
