@@ -6,7 +6,7 @@ let DEBUG = false;
 if (process.env.NODE_ENV === 'production') {
   DEBUG = false;
 }
-const MINUTES_BETWEEN_RUNS = 1;
+const MINUTES_BETWEEN_RUNS = 2;
 
 const searchUrl = () => {
   let d = new Date();
