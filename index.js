@@ -2,7 +2,10 @@ const Twitter = require('twitter-lite');
 const queryString = require('query-string');
 require('dotenv').config();
 
-const DEBUG = true;
+const DEBUG = false;
+if (process.env.NODE_ENV === 'production') {
+  DEBUG = false;
+}
 const MINUTES_BETWEEN_RUNS = 1;
 
 const searchUrl = () => {
@@ -13,7 +16,7 @@ const searchUrl = () => {
     'tweet.fields': 'conversation_id,author_id',
     'user.fields': 'username',
     expansions: 'author_id',
-    start_time: d.toISOString(),
+    // start_time: d.toISOString(),
   };
   DEBUG && console.log('params', JSON.stringify(params, null, 2));
   const qs = queryString.stringify(params);
@@ -22,8 +25,9 @@ const searchUrl = () => {
 
 const buildStatus = (tweet, usernameMap) => {
   const username = usernameMap[tweet.author_id];
-  const url = `https://twitter.com/i/status/${tweet.conversation_id}`;
-  return `@${username} 📜 the.rip?${url}`;
+  const btoa = require('abab/lib/btoa');
+  const encodedUrl = btoa(`https://twitter.com/i/status/${tweet.conversation_id}`);
+  return `@${username} 📜 the.rip/${encodedUrl}`;
 };
 
 const run = async () => {
@@ -58,7 +62,7 @@ const run = async () => {
         usernameMap[u.id] = u.username;
       });
     }
-    DEBUG && console.log('usernameMap', JSON.stringify(usernameMap, null, 2));
+    // DEBUG && console.log('usernameMap', JSON.stringify(usernameMap, null, 2));
     const searchData = searchRes.data;
     if (searchData) {
       searchData.forEach((t) => {
@@ -69,7 +73,7 @@ const run = async () => {
               status: status,
               in_reply_to_status_id: t.id,
             };
-            DEBUG && console.log('postParams', JSON.stringify(params, null, 2));
+            // DEBUG && console.log('postParams', JSON.stringify(params, null, 2));
             const replyRes = await v1Client.post('statuses/update.json', params);
             DEBUG && console.log('replyRes', JSON.stringify(replyRes, null, 2));
           } catch (e) {

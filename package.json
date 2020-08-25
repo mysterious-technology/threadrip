@@ -6,6 +6,7 @@
   "author": "Ben Guo <benzguo@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "abab": "^2.0.4",
     "dotenv": "^8.2.0",
     "query-string": "^6.13.1",
     "twitter-lite": "https://github.com/mysterious-technology/twitter-lite#master"
