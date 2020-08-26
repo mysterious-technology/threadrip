@@ -6,7 +6,6 @@ let DEBUG = false;
 if (process.env.NODE_ENV === 'production') {
   DEBUG = false;
 }
-const MINUTES_BETWEEN_RUNS = 2;
 
 const searchUrl = (sinceId) => {
   const params = {
@@ -27,7 +26,9 @@ const buildStatus = (tweet, usernameMap) => {
   const username = usernameMap[tweet.author_id];
   const btoa = require('abab/lib/btoa');
   const encodedUrl = btoa(`https://twitter.com/i/status/${tweet.conversation_id}`);
-  return `@${username} 📜 the.rip/${encodedUrl}`;
+  return `@${username} 🔗 the.rip/${encodedUrl}
+‪👋 𝘐𝘧 𝘵𝘩𝘪𝘴 𝘪𝘴 𝘺𝘰𝘶𝘳 𝘧𝘪𝘳𝘴𝘵 𝘵𝘪𝘮𝘦 𝘶𝘴𝘪𝘯𝘨 𝘛𝘩𝘦.𝘙𝘪𝘱, 𝘺𝘰𝘶'𝘭𝘭 𝘩𝘢𝘷𝘦 𝘵𝘰 𝘴𝘪𝘨𝘯 𝘵𝘰 𝘷𝘪𝘦𝘸 𝘵𝘩𝘦 𝘶𝘯𝘳𝘰𝘭𝘭.
+☑️ 𝙍𝙚𝙢𝙚𝙢𝙗𝙚𝙧 𝙢𝙚 𝘴𝘰 𝘺𝘰𝘶 𝘥𝘰𝘯'𝘵 𝘩𝘢𝘷𝘦 𝘵𝘰 𝘴𝘪𝘨𝘯 𝘪𝘯 𝘢𝘨𝘢𝘪𝘯.‬`;
 };
 
 const run = async () => {
