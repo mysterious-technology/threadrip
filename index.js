@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const searchUrl = (sinceId) => {
   const params = {
-    query: '@threadrip unroll',
+    query: '@threadrip',
     'tweet.fields': 'conversation_id,author_id',
     'user.fields': 'username',
     expansions: 'author_id',
