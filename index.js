@@ -15,7 +15,7 @@ const searchUrl = (sinceId) => {
     expansions: 'author_id',
   };
   if (sinceId) {
-    params['since_id'] = sinceId;
+    params['since_id'] = `${sinceId}`;
   }
   DEBUG && console.log('params', JSON.stringify(params, null, 2));
   const qs = queryString.stringify(params);
@@ -85,9 +85,11 @@ const run = async () => {
               status: status,
               in_reply_to_status_id: t.id,
             };
-            const replyRes = await v1Client.post('statuses/update.json', params);
+            if (!DEBUG) {
+              const replyRes = await v1Client.post('statuses/update.json', params);
+              DEBUG && console.log('replyRes', JSON.stringify(replyRes, null, 2));
+            }
             console.log('replied to:', t.id);
-            DEBUG && console.log('replyRes', JSON.stringify(replyRes, null, 2));
           } catch (e) {
             console.log(e);
           }
@@ -95,9 +97,12 @@ const run = async () => {
         reply();
       });
       const newSinceId = searchData[0].id;
-      await stripe.customers.update(process.env.STRIPE_CUSTOMER_ID, {
-        metadata: { since_id: `${newSinceId}` },
-      });
+      if (!DEBUG) {
+        await stripe.customers.update(process.env.STRIPE_CUSTOMER_ID, {
+          metadata: { since_id: `${newSinceId}` },
+        });
+      }
+      console.log('updated since_id:', newSinceId);
     }
   } catch (e) {
     console.error(e);
