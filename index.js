@@ -27,7 +27,7 @@ const buildStatus = (tweet, usernameMap) => {
   const btoa = require('abab/lib/btoa');
   const encodedUrl = btoa(`https://twitter.com/i/status/${tweet.conversation_id}`);
   return `@${username} 🔗 the.rip/${encodedUrl}
-‪👋 𝘐𝘧 𝘵𝘩𝘪𝘴 𝘪𝘴 𝘺𝘰𝘶𝘳 𝘧𝘪𝘳𝘴𝘵 𝘵𝘪𝘮𝘦 𝘶𝘴𝘪𝘯𝘨 𝘛𝘩𝘦.𝘙𝘪𝘱, 𝘺𝘰𝘶'𝘭𝘭 𝘩𝘢𝘷𝘦 𝘵𝘰 𝘴𝘪𝘨𝘯 𝘵𝘰 𝘷𝘪𝘦𝘸 𝘵𝘩𝘦 𝘶𝘯𝘳𝘰𝘭𝘭.
+‪👋 𝘐𝘧 𝘵𝘩𝘪𝘴 𝘪𝘴 𝘺𝘰𝘶𝘳 𝘧𝘪𝘳𝘴𝘵 𝘵𝘪𝘮𝘦 𝘶𝘴𝘪𝘯𝘨 𝘛𝘩𝘦.𝘙𝘪𝘱, 𝘺𝘰𝘶'𝘭𝘭 𝘩𝘢𝘷𝘦 𝘵𝘰 𝘴𝘪𝘨𝘯 𝘵𝘰 𝘶𝘯𝘳𝘰𝘭𝘭.
 📅 𝘛𝘸𝘦𝘦𝘵𝘴 𝘰𝘭𝘥𝘦𝘳 𝘵𝘩𝘢𝘯 7 𝘥𝘢𝘺𝘴 𝘤𝘢𝘯'𝘵 𝘣𝘦 𝘶𝘯𝘳𝘰𝘭𝘭𝘦𝘥 𝘳𝘪𝘨𝘩𝘵 𝘯𝘰𝘸.‬`;
 };
 
@@ -77,6 +77,7 @@ const run = async () => {
     // DEBUG && console.log('usernameMap', JSON.stringify(usernameMap, null, 2));
     const searchData = searchRes.data;
     if (searchData) {
+      let newSinceId = null;
       searchData.forEach((t) => {
         const reply = async () => {
           const status = buildStatus(t, usernameMap);
@@ -88,6 +89,9 @@ const run = async () => {
             if (!DEBUG) {
               const replyRes = await v1Client.post('statuses/update.json', params);
               DEBUG && console.log('replyRes', JSON.stringify(replyRes, null, 2));
+              if (replyRes) {
+                newSinceId = t.id;
+              }
             }
             console.log('replied to:', t.id);
           } catch (e) {
@@ -96,8 +100,7 @@ const run = async () => {
         };
         reply();
       });
-      const newSinceId = searchData[0].id;
-      if (!DEBUG) {
+      if (newSinceId && !DEBUG) {
         await stripe.customers.update(process.env.STRIPE_CUSTOMER_ID, {
           metadata: { since_id: `${newSinceId}` },
         });
