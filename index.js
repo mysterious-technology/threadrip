@@ -65,7 +65,7 @@ const run = async () => {
   const v1Client = new Twitter(v1Config);
   try {
     const searchRes = await v2Client.get(searchUrl(sinceId));
-    console.log('search:', searchRes.meta);
+    console.log('search.meta:', searchRes.meta);
     DEBUG && console.log('searchRes', JSON.stringify(searchRes, null, 2));
     let usernameMap = {};
     if (searchRes.includes && searchRes.includes.users) {
@@ -76,39 +76,46 @@ const run = async () => {
     }
     // DEBUG && console.log('usernameMap', JSON.stringify(usernameMap, null, 2));
     const searchData = searchRes.data;
-    if (searchData) {
-      let newSinceId = null;
-      searchData.forEach((t) => {
-        const reply = async () => {
-          const status = buildStatus(t, usernameMap);
-          const params = {
-            status: status,
-            in_reply_to_status_id: t.id,
-          };
+    if (searchData && searchData.length > 0) {
+      const updateSinceId = async (sinceId) => {
+        if (sinceId && sinceId.length > 0 && sinceId !== 'null') {
           try {
-            if (!DEBUG) {
-              const replyRes = await v1Client.post('statuses/update.json', params);
-              console.log('replyRes', JSON.stringify(replyRes, null, 2));
-            }
-            newSinceId = t.id;
-            console.log('newSinceId', newSinceId);
+            await stripe.customers.update(process.env.STRIPE_CUSTOMER_ID, {
+              metadata: { since_id: sinceId },
+            });
+            console.log('updated since_id:', sinceId);
           } catch (e) {
-            console.error(e);
+            console.error('Error updating since_id: ', e);
           }
-          console.log('replied to:', t.id);
-          if (newSinceId) {
-            if (!DEBUG) {
-              await stripe.customers.update(process.env.STRIPE_CUSTOMER_ID, {
-                metadata: { since_id: `${newSinceId}` },
-              });
-            }
-            console.log('updated since_id:', newSinceId);
-          } else {
-            console.error('newSinceId is null');
-          }
+        } else {
+          console.error('newSinceId is null');
+        }
+      };
+
+      const reply = async (t) => {
+        const status = buildStatus(t, usernameMap);
+        const params = {
+          status: status,
+          in_reply_to_status_id: t.id,
         };
-        reply();
+        try {
+          if (!DEBUG) {
+            const replyRes = await v1Client.post('statuses/update.json', params);
+            console.log('replied to:', t.id);
+            console.log('  reply id: ', replyRes.id);
+          }
+          newSinceId = t.id;
+        } catch (e) {
+          console.error('Error posting reply: ', e['errors']);
+        }
+      };
+
+      const sortedData = searchData.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+      const latestTweet = sortedData[sortedData.length - 1];
+      sortedData.forEach((t) => {
+        reply(t);
       });
+      updateSinceId(latestTweet.id);
     }
   } catch (e) {
     console.error(e);
