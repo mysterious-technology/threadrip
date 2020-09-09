@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const searchUrl = (sinceId) => {
   const params = {
-    query: '@threadrip',
+    query: '@threadrip unroll',
     'tweet.fields': 'conversation_id,author_id',
     'user.fields': 'username',
     expansions: 'author_id',
@@ -81,31 +81,34 @@ const run = async () => {
       searchData.forEach((t) => {
         const reply = async () => {
           const status = buildStatus(t, usernameMap);
+          const params = {
+            status: status,
+            in_reply_to_status_id: t.id,
+          };
           try {
-            const params = {
-              status: status,
-              in_reply_to_status_id: t.id,
-            };
             if (!DEBUG) {
               const replyRes = await v1Client.post('statuses/update.json', params);
-              DEBUG && console.log('replyRes', JSON.stringify(replyRes, null, 2));
-              if (replyRes) {
-                newSinceId = t.id;
-              }
+              console.log('replyRes', JSON.stringify(replyRes, null, 2));
             }
-            console.log('replied to:', t.id);
+            newSinceId = t.id;
+            console.log('newSinceId', newSinceId);
           } catch (e) {
-            console.log(e);
+            console.error(e);
+          }
+          console.log('replied to:', t.id);
+          if (newSinceId) {
+            if (!DEBUG) {
+              await stripe.customers.update(process.env.STRIPE_CUSTOMER_ID, {
+                metadata: { since_id: `${newSinceId}` },
+              });
+            }
+            console.log('updated since_id:', newSinceId);
+          } else {
+            console.error('newSinceId is null');
           }
         };
         reply();
       });
-      if (newSinceId && !DEBUG) {
-        await stripe.customers.update(process.env.STRIPE_CUSTOMER_ID, {
-          metadata: { since_id: `${newSinceId}` },
-        });
-      }
-      console.log('updated since_id:', newSinceId);
     }
   } catch (e) {
     console.error(e);
